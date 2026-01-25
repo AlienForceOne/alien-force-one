@@ -26,7 +26,7 @@
     <div id="login-screen" class="min-h-screen flex items-center justify-center px-4">
         <div class="admin-card p-8 max-w-md w-full">
             <h1 class="text-3xl street-title italic text-center mb-2">ADMIN ACCESS</h1>
-            <p class="text-xs opacity-40 text-center mb-8 uppercase tracking-widest">Alien Force One / Control Panel</p>
+            <p class="text-xs opacity-40 text-center mb-8 uppercase tracking-widest">Alien Force One® / Control Panel</p>
             
             <input type="text" id="admin-user" placeholder="Usuario" class="admin-input mb-4">
             <input type="password" id="admin-pass" placeholder="Contraseña" class="admin-input mb-6">
@@ -223,8 +223,71 @@
             const mockups = document.getElementById('mockups').files;
             const tallerImgs = document.getElementById('taller-imgs').files;
 
-            if (!nombre || !precio || mockups.length === 0) {
-                document.getElementById('producto-status').textContent = '⚠ Completa nombre, precio y sube al menos 1 mockup';
+            if (!nombre || !precio) {
+                document.getElementById('producto-status').textContent = '⚠ Completa nombre y precio';
+                document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-yellow-500';
+                return;
+            }
+
+            // MODO EDICIÓN
+            if (productoEditando) {
+                document.getElementById('producto-status').textContent = 'Actualizando producto...';
+                document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-blue-500';
+
+                let imagen_url = productoEditando.imagen_url;
+                let mockupUrls = productoEditando.mockups || [];
+                let tallerUrls = productoEditando.imagenes_taller || [];
+
+                // Subir nuevos mockups si hay
+                if (mockups.length > 0) {
+                    mockupUrls = [];
+                    for (let i = 0; i < Math.min(mockups.length, 4); i++) {
+                        const file = mockups[i];
+                        const fileName = `${Date.now()}_mockup_${i}_${file.name}`;
+                        await _supabase.storage.from('productos').upload(fileName, file);
+                        const { data: { publicUrl } } = _supabase.storage.from('productos').getPublicUrl(fileName);
+                        mockupUrls.push(publicUrl);
+                    }
+                    imagen_url = mockupUrls[0];
+                }
+
+                // Subir nuevas imágenes de taller si hay
+                if (tallerImgs.length > 0) {
+                    tallerUrls = [];
+                    for (let i = 0; i < Math.min(tallerImgs.length, 4); i++) {
+                        const file = tallerImgs[i];
+                        const fileName = `${Date.now()}_taller_${i}_${file.name}`;
+                        await _supabase.storage.from('productos').upload(fileName, file);
+                        const { data: { publicUrl } } = _supabase.storage.from('productos').getPublicUrl(fileName);
+                        tallerUrls.push(publicUrl);
+                    }
+                }
+
+                const { error } = await _supabase.from('productos').update({
+                    nombre,
+                    tipo,
+                    precio: parseFloat(precio),
+                    calce,
+                    imagen_url,
+                    mockups: mockupUrls,
+                    imagenes_taller: tallerUrls
+                }).eq('id', productoEditando.id);
+
+                if (error) {
+                    document.getElementById('producto-status').textContent = '❌ Error: ' + error.message;
+                    document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-red-500';
+                } else {
+                    document.getElementById('producto-status').textContent = '✓ Producto actualizado exitosamente';
+                    document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-green-500';
+                    cancelarEdicion();
+                    cargarProductos();
+                }
+                return;
+            }
+
+            // MODO CREAR NUEVO
+            if (mockups.length === 0) {
+                document.getElementById('producto-status').textContent = '⚠ Sube al menos 1 mockup';
                 document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-yellow-500';
                 return;
             }
@@ -314,17 +377,83 @@
             }
 
             container.innerHTML = productos.map(p => `
-                <div class="bg-black/50 p-4 flex justify-between items-center border border-white/5">
-                    <div class="flex items-center gap-4">
-                        <img src="${p.imagen_url}" class="w-16 h-16 object-cover">
-                        <div>
-                            <p class="font-bold text-sm">${p.nombre}</p>
-                            <p class="text-xs opacity-60">${p.tipo} - $${p.precio}</p>
+                <div class="bg-black/50 p-4 border border-white/5">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-4 flex-1">
+                            <img src="${p.imagen_url}" class="w-16 h-16 object-cover">
+                            <div>
+                                <p class="font-bold text-sm">${p.nombre}</p>
+                                <p class="text-xs opacity-60">${p.tipo} - ${p.precio}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editarProducto(${p.id})" class="text-[#7B61FF] text-xs hover:text-[#6451DD] font-bold uppercase">
+                                Editar
+                            </button>
+                            <button onclick="eliminarProducto(${p.id})" class="text-red-500 text-xs hover:text-red-400 font-bold uppercase">
+                                Eliminar
+                            </button>
                         </div>
                     </div>
-                    <button onclick="eliminarProducto(${p.id})" class="text-red-500 text-xs hover:text-red-400">Eliminar</button>
                 </div>
             `).join('');
+        }
+
+        let productoEditando = null;
+
+        async function editarProducto(id) {
+            const { data: producto } = await _supabase.from('productos').select('*').eq('id', id).single();
+            
+            if (!producto) return;
+
+            productoEditando = producto;
+
+            // Llenar formulario con datos del producto
+            document.getElementById('prod-nombre').value = producto.nombre;
+            document.getElementById('prod-tipo').value = producto.tipo;
+            document.getElementById('prod-precio').value = producto.precio;
+            document.getElementById('prod-calce').value = producto.calce || '';
+
+            // Cambiar texto del botón
+            const btn = document.querySelector('button[onclick="guardarProducto()"]');
+            btn.textContent = 'Actualizar Producto';
+            btn.className = 'admin-btn w-full bg-[#7B61FF]';
+
+            // Agregar botón cancelar
+            if (!document.getElementById('btn-cancelar-edicion')) {
+                const btnCancelar = document.createElement('button');
+                btnCancelar.id = 'btn-cancelar-edicion';
+                btnCancelar.textContent = 'Cancelar Edición';
+                btnCancelar.className = 'admin-btn admin-btn-secondary w-full mt-3';
+                btnCancelar.onclick = cancelarEdicion;
+                btn.parentNode.appendChild(btnCancelar);
+            }
+
+            // Scroll al formulario
+            document.querySelector('.admin-card').scrollIntoView({ behavior: 'smooth' });
+
+            document.getElementById('producto-status').textContent = '✏️ Editando: ' + producto.nombre;
+            document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-blue-500';
+        }
+
+        function cancelarEdicion() {
+            productoEditando = null;
+            document.getElementById('prod-nombre').value = '';
+            document.getElementById('prod-precio').value = '';
+            document.getElementById('prod-calce').value = '';
+            document.getElementById('mockups').value = '';
+            document.getElementById('taller-imgs').value = '';
+            document.getElementById('preview-mockups').innerHTML = '';
+            document.getElementById('preview-taller').innerHTML = '';
+            
+            const btn = document.querySelector('button[onclick="guardarProducto()"]');
+            btn.textContent = 'Guardar Producto';
+            btn.className = 'admin-btn w-full';
+
+            const btnCancelar = document.getElementById('btn-cancelar-edicion');
+            if (btnCancelar) btnCancelar.remove();
+
+            document.getElementById('producto-status').textContent = '';
         }
 
         async function eliminarProducto(id) {

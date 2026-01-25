@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community | A.F.ONE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F4F4F2; color: #1A1A1A; }
+        .street-title { font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; }
+        .upload-zone { border: 2px dashed #7B61FF; background: white; transition: all 0.3s; }
+        .upload-zone:hover { border-color: #6451DD; background: #F9F9F9; }
+        .foto-card { background: white; border: 1px solid #E5E5E5; transition: all 0.3s; position: relative; overflow: hidden; }
+        .foto-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .votar-btn { background: #7B61FF; color: white; font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; padding: 8px 16px; cursor: pointer; border: none; transition: all 0.3s; }
+        .votar-btn:hover { background: #6451DD; }
+        .votado { background: #1A1A1A; }
+    </style>
+</head>
+<body>
+
+    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="text-xl street-title italic">ALIEN FORCE <span class="text-[#7B61FF]">COMMUNITY</span></div>
+        <a href="index.html" class="text-xs font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition">← Volver</a>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <h1 class="text-5xl md:text-7xl street-title italic mb-4">SKATE COMMUNITY</h1>
+            <p class="text-xs uppercase tracking-[0.4em] opacity-40 font-bold">Temporada 2025-01 / Auspiciado por A.F.ONE</p>
+        </div>
+
+        <!-- Subir foto -->
+        <div class="max-w-2xl mx-auto mb-20">
+            <div class="upload-zone p-12 text-center cursor-pointer" onclick="document.getElementById('foto-input').click()">
+                <input type="file" id="foto-input" accept="image/*" class="hidden" onchange="subirFoto(event)">
+                <svg class="w-16 h-16 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <h3 class="street-title text-2xl mb-2">SUBE TU FOTO</h3>
+                <p class="text-xs uppercase tracking-widest opacity-60">Click para seleccionar</p>
+            </div>
+            
+            <div class="mt-6">
+                <input type="text" id="usuario-nombre" placeholder="Tu nombre (opcional)" class="w-full p-3 border border-black/10 text-sm">
+            </div>
+            
+            <p id="upload-status" class="text-xs text-center mt-4"></p>
+        </div>
+
+        <!-- Filtros -->
+        <div class="flex justify-center gap-6 mb-12 text-xs font-black uppercase tracking-widest border-b border-black/5 pb-4">
+            <button onclick="ordenarPor('recientes')" id="filter-recientes" class="text-[#7B61FF]">Recientes</button>
+            <button onclick="ordenarPor('populares')" id="filter-populares" class="opacity-40 hover:opacity-100">Más Votadas</button>
+        </div>
+
+        <!-- Grid de fotos -->
+        <div id="galeria" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+
+        <!-- Ranking Top 3 -->
+        <div class="mt-24 max-w-4xl mx-auto">
+            <h2 class="text-4xl street-title italic text-center mb-12">TOP 3 TEMPORADA</h2>
+            <div id="ranking-top" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+        </div>
+    </main>
+
+    <script>
+        const _supabase = supabase.createClient('https://hklnisiyaxffayjqsngi.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrbG5pc2l5YXhmZmF5anFzbmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5NDk3ODUsImV4cCI6MjA4NDUyNTc4NX0.jKX6weP91vPRGGafcJRpS9dEYLTJNMC-0tB8FpwE35I');
+
+        let ordenActual = 'recientes';
+        let fotosVotadas = JSON.parse(localStorage.getItem('afone_votos') || '[]');
+
+        // Subir foto
+        async function subirFoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const status = document.getElementById('upload-status');
+            status.textContent = 'Subiendo foto...';
+            status.className = 'text-xs text-center mt-4 text-blue-600';
+
+            // Subir a Supabase Storage
+            const fileName = `${Date.now()}_${file.name}`;
+            const { data: uploadData, error: uploadError } = await _supabase.storage
+                .from('productos')
+                .upload(`comunidad/${fileName}`, file);
+
+            if (uploadError) {
+                status.textContent = '❌ Error al subir: ' + uploadError.message;
+                status.className = 'text-xs text-center mt-4 text-red-600';
+                return;
+            }
+
+            const { data: { publicUrl } } = _supabase.storage
+                .from('productos')
+                .getPublicUrl(`comunidad/${fileName}`);
+
+            // Guardar en base de datos
+            const usuarioNombre = document.getElementById('usuario-nombre').value || 'Anónimo';
+            const { error: dbError } = await _supabase.from('comunidad').insert({
+                foto_url: publicUrl,
+                usuario_nombre: usuarioNombre,
+                votos: 0,
+                temporada: '2025-01'
+            });
+
+            if (dbError) {
+                status.textContent = '❌ Error: ' + dbError.message;
+                status.className = 'text-xs text-center mt-4 text-red-600';
+            } else {
+                status.textContent = '✓ ¡Foto subida! Comparte para conseguir votos';
+                status.className = 'text-xs text-center mt-4 text-green-600';
+                document.getElementById('usuario-nombre').value = '';
+                document.getElementById('foto-input').value = '';
+                cargarFotos();
+            }
+        }
+
+        // Cargar fotos
+        async function cargarFotos() {
+            let query = _supabase.from('comunidad').select('*');
+            
+            if (ordenActual === 'populares') {
+                query = query.order('votos', { ascending: false });
+            } else {
+                query = query.order('created_at', { ascending: false });
+            }
+
+            const { data: fotos } = await query;
+            const galeria = document.getElementById('galeria');
+
+            if (!fotos || fotos.length === 0) {
+                galeria.innerHTML = '<p class="text-xs opacity-40 italic text-center col-span-3">No hay fotos subidas aún. ¡Sé el primero!</p>';
+                return;
+            }
+
+            galeria.innerHTML = fotos.map(f => {
+                const yaVotado = fotosVotadas.includes(f.id);
+                return `
+                    <div class="foto-card">
+                        <img src="${f.foto_url}" class="w-full h-80 object-cover" alt="Skate photo">
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <p class="text-sm font-bold">${f.usuario_nombre || 'Anónimo'}</p>
+                                <p class="text-xs opacity-60">${f.votos} votos</p>
+                            </div>
+                            <button 
+                                onclick="votar(${f.id})" 
+                                class="votar-btn w-full ${yaVotado ? 'votado' : ''}"
+                                ${yaVotado ? 'disabled' : ''}
+                            >
+                                ${yaVotado ? '✓ VOTADO' : '↑ VOTAR'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Actualizar top 3
+            const top3 = fotos.slice(0, 3);
+            document.getElementById('ranking-top').innerHTML = top3.map((f, idx) => `
+                <div class="text-center">
+                    <div class="text-6xl street-title italic text-[#7B61FF] mb-4">#${idx + 1}</div>
+                    <img src="${f.foto_url}" class="w-full h-64 object-cover mb-4 grayscale hover:grayscale-0 transition">
+                    <p class="font-bold">${f.usuario_nombre || 'Anónimo'}</p>
+                    <p class="text-xs opacity-60">${f.votos} votos</p>
+                </div>
+            `).join('');
+        }
+
+        // Votar
+        async function votar(fotoId) {
+            if (fotosVotadas.includes(fotoId)) return;
+
+            // Incrementar voto en DB
+            const { data: foto } = await _supabase
+                .from('comunidad')
+                .select('votos')
+                .eq('id', fotoId)
+                .single();
+
+            await _supabase
+                .from('comunidad')
+                .update({ votos: (foto.votos || 0) + 1 })
+                .eq('id', fotoId);
+
+            // Marcar como votado localmente
+            fotosVotadas.push(fotoId);
+            localStorage.setItem('afone_votos', JSON.stringify(fotosVotadas));
+
+            cargarFotos();
+        }
+
+        // Cambiar orden
+        function ordenarPor(tipo) {
+            ordenActual = tipo;
+            document.querySelectorAll('[id^="filter-"]').forEach(btn => {
+                btn.classList.remove('text-[#7B61FF]');
+                btn.classList.add('opacity-40');
+            });
+            document.getElementById('filter-' + tipo).classList.add('text-[#7B61FF]');
+            document.getElementById('filter-' + tipo).classList.remove('opacity-40');
+            cargarFotos();
+        }
+
+        // Inicializar
+        cargarFotos();
+    </script>
+
+    <footer class="bg-black text-white py-12 px-6 mt-20">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="text-xl street-title italic mb-4">ALIEN FORCE <span class="text-[#7B61FF]">ONE</span></div>
+            <div class="text-xs opacity-60 space-y-2">
+                <p>[TU RAZÓN SOCIAL] - CUIT: [TU CUIT]</p>
+                <p>[TU DOMICILIO LEGAL]</p>
+                <p>Email: [TU EMAIL] | WhatsApp: [TU WHATSAPP]</p>
+            </div>
+            <div class="mt-8 pt-8 border-t border-white/10 flex flex-wrap justify-center gap-6 text-xs">
+                <a href="terminos.html" class="hover:text-[#7B61FF] transition">Términos y Condiciones</a>
+                <a href="privacidad.html" class="hover:text-[#7B61FF] transition">Política de Privacidad</a>
+                <a href="arrepentimiento.html" class="hover:text-[#7B61FF] transition">Botón de Arrepentimiento</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

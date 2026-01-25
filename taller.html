@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller | A.F.ONE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0A0A0A; color: #F4F4F2; }
+        .street-title { font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; }
+        .taller-card { background: #1A1A1A; border: 1px solid #333; }
+        .taller-input { background: #0A0A0A; border: 1px solid #333; color: #F4F4F2; padding: 12px; width: 100%; }
+        .taller-input:focus { outline: none; border-color: #7B61FF; }
+        .taller-btn { background: #7B61FF; color: white; padding: 12px 24px; font-weight: 900; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; cursor: pointer; border: none; transition: all 0.3s; }
+        .taller-btn:hover { background: #6451DD; }
+        .imagen-taller { width: 100%; height: 300px; object-fit: cover; border: 2px solid #333; }
+    </style>
+</head>
+<body>
+
+    <!-- Pantalla de Login -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center px-4">
+        <div class="taller-card p-8 max-w-md w-full">
+            <h1 class="text-3xl street-title italic text-center mb-2">TALLER ACCESS</h1>
+            <p class="text-xs opacity-40 text-center mb-8 uppercase tracking-widest">Producción / A.F.ONE</p>
+            
+            <input type="text" id="taller-user" placeholder="Usuario del taller" class="taller-input mb-4">
+            <input type="password" id="taller-pass" placeholder="Contraseña" class="taller-input mb-6">
+            
+            <button onclick="loginTaller()" class="taller-btn w-full">Ingresar al Taller</button>
+            <p id="login-error" class="text-red-500 text-xs mt-4 text-center hidden"></p>
+            
+            <div class="mt-8 pt-6 border-t border-white/5">
+                <a href="index.html" class="text-xs opacity-40 hover:opacity-100 transition uppercase tracking-widest">← Volver al Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Principal (oculto hasta login) -->
+    <div id="taller-panel" class="hidden">
+        <nav class="bg-black border-b border-white/10 px-6 py-4 flex justify-between items-center">
+            <div class="text-xl street-title italic">TALLER <span class="text-[#7B61FF]">PRODUCCIÓN</span></div>
+            <div class="flex items-center gap-4">
+                <span id="taller-nombre" class="text-xs opacity-60 uppercase tracking-widest"></span>
+                <button onclick="cerrarSesion()" class="text-xs opacity-40 hover:opacity-100 uppercase tracking-widest">Cerrar Sesión</button>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <!-- Pestañas -->
+            <div class="flex space-x-4 mb-12 border-b border-white/10 pb-4">
+                <button onclick="cambiarTab('pedidos')" id="tab-pedidos" class="tab-btn text-sm font-black uppercase tracking-widest text-[#7B61FF] border-b-2 border-[#7B61FF] pb-2">Nuevo Pedido</button>
+                <button onclick="cambiarTab('produccion')" id="tab-produccion" class="tab-btn text-sm font-black uppercase tracking-widest opacity-40 hover:opacity-100 pb-2">En Producción</button>
+                <button onclick="cambiarTab('imagenes')" id="tab-imagenes" class="tab-btn text-sm font-black uppercase tracking-widest opacity-40 hover:opacity-100 pb-2">Catálogo Imágenes</button>
+            </div>
+
+            <!-- TAB: NUEVO PEDIDO -->
+            <div id="content-pedidos">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Formulario de pedido -->
+                    <div class="taller-card p-8">
+                        <h2 class="text-2xl street-title italic mb-6">Ingresar Pedido</h2>
+                        
+                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Seleccionar Producto</label>
+                        <select id="pedido-producto" class="taller-input mb-4" onchange="cargarImagenesProducto()">
+                            <option value="">-- Seleccionar --</option>
+                        </select>
+                        
+                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Cliente</label>
+                        <input type="text" id="pedido-cliente" placeholder="Nombre del cliente" class="taller-input mb-4">
+                        
+                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Cantidad</label>
+                        <input type="number" id="pedido-cantidad" placeholder="1" class="taller-input mb-4" value="1">
+                        
+                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Talle</label>
+                        <select id="pedido-talle" class="taller-input mb-4">
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                        
+                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Notas / Observaciones</label>
+                        <textarea id="pedido-notas" placeholder="Detalles adicionales..." class="taller-input mb-6" rows="3"></textarea>
+                        
+                        <button onclick="crearPedido()" class="taller-btn w-full">Crear Pedido</button>
+                        <p id="pedido-status" class="text-xs mt-4 text-center"></p>
+                    </div>
+
+                    <!-- Imágenes del producto seleccionado -->
+                    <div class="taller-card p-8">
+                        <h2 class="text-2xl street-title italic mb-6">Imágenes para Producción</h2>
+                        <div id="imagenes-producto" class="grid grid-cols-2 gap-4">
+                            <p class="text-xs opacity-40 italic col-span-2">Selecciona un producto para ver sus imágenes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: EN PRODUCCIÓN -->
+            <div id="content-produccion" class="hidden">
+                <div class="taller-card p-8">
+                    <h2 class="text-2xl street-title italic mb-6">Pedidos en Producción</h2>
+                    <div id="lista-produccion" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- TAB: CATÁLOGO IMÁGENES -->
+            <div id="content-imagenes" class="hidden">
+                <div class="taller-card p-8">
+                    <h2 class="text-2xl street-title italic mb-6">Catálogo Completo de Productos</h2>
+                    <div id="catalogo-completo" class="space-y-8"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient('https://hklnisiyaxffayjqsngi.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrbG5pc2l5YXhmZmF5anFzbmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5NDk3ODUsImV4cCI6MjA4NDUyNTc4NX0.jKX6weP91vPRGGafcJRpS9dEYLTJNMC-0tB8FpwE35I');
+
+        let tallerActual = null;
+
+        // Login
+        async function loginTaller() {
+            const user = document.getElementById('taller-user').value;
+            const pass = document.getElementById('taller-pass').value;
+            
+            const { data: talleres, error } = await _supabase
+                .from('talleres')
+                .select('*')
+                .eq('usuario', user)
+                .eq('password', pass)
+                .eq('activo', true)
+                .single();
+            
+            if (error || !talleres) {
+                const errorMsg = document.getElementById('login-error');
+                errorMsg.textContent = 'Credenciales incorrectas o taller inactivo';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            tallerActual = talleres;
+            sessionStorage.setItem('taller_logged', JSON.stringify(talleres));
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('taller-panel').classList.remove('hidden');
+            document.getElementById('taller-nombre').textContent = talleres.nombre;
+            
+            cargarProductosSelect();
+            cargarPedidos();
+            cargarCatalogo();
+        }
+
+        function cerrarSesion() {
+            sessionStorage.removeItem('taller_logged');
+            location.reload();
+        }
+
+        // Verificar sesión al cargar
+        window.onload = function() {
+            const session = sessionStorage.getItem('taller_logged');
+            if (session) {
+                tallerActual = JSON.parse(session);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('taller-panel').classList.remove('hidden');
+                document.getElementById('taller-nombre').textContent = tallerActual.nombre;
+                cargarProductosSelect();
+                cargarPedidos();
+                cargarCatalogo();
+            }
+        };
+
+        // Tabs
+        function cambiarTab(tab) {
+            ['pedidos', 'produccion', 'imagenes'].forEach(t => {
+                document.getElementById('content-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).classList.remove('text-[#7B61FF]', 'border-b-2', 'border-[#7B61FF]');
+                document.getElementById('tab-' + t).classList.add('opacity-40');
+            });
+            document.getElementById('content-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.add('text-[#7B61FF]', 'border-b-2', 'border-[#7B61FF]');
+            document.getElementById('tab-' + tab).classList.remove('opacity-40');
+        }
+
+        // Cargar productos en select
+        async function cargarProductosSelect() {
+            const { data: productos } = await _supabase
+                .from('productos')
+                .select('*')
+                .eq('aprobado', true);
+            
+            const select = document.getElementById('pedido-producto');
+            if (productos && productos.length > 0) {
+                select.innerHTML = '<option value="">-- Seleccionar --</option>' +
+                    productos.map(p => `<option value="${p.id}">${p.nombre} - ${p.tipo}</option>`).join('');
+            }
+        }
+
+        // Cargar imágenes del producto seleccionado
+        async function cargarImagenesProducto() {
+            const productoId = document.getElementById('pedido-producto').value;
+            const container = document.getElementById('imagenes-producto');
+            
+            if (!productoId) {
+                container.innerHTML = '<p class="text-xs opacity-40 italic col-span-2">Selecciona un producto para ver sus imágenes</p>';
+                return;
+            }
+
+            const { data: producto } = await _supabase
+                .from('productos')
+                .select('*')
+                .eq('id', productoId)
+                .single();
+            
+            if (producto && producto.imagenes_taller) {
+                container.innerHTML = producto.imagenes_taller.map(img => 
+                    `<img src="${img}" class="imagen-taller" alt="Imagen producción">`
+                ).join('');
+            } else {
+                container.innerHTML = '<p class="text-xs opacity-40 italic col-span-2">No hay imágenes de taller para este producto</p>';
+            }
+        }
+
+        // Crear pedido
+        async function crearPedido() {
+            const productoId = document.getElementById('pedido-producto').value;
+            const cliente = document.getElementById('pedido-cliente').value;
+            const cantidad = document.getElementById('pedido-cantidad').value;
+            const talle = document.getElementById('pedido-talle').value;
+            const notas = document.getElementById('pedido-notas').value;
+
+            if (!productoId || !cliente) {
+                document.getElementById('pedido-status').textContent = '⚠ Completa producto y cliente';
+                document.getElementById('pedido-status').className = 'text-xs mt-4 text-center text-yellow-500';
+                return;
+            }
+
+            const { error } = await _supabase.from('pedidos').insert({
+                taller_id: tallerActual.id,
+                producto_id: productoId,
+                cliente,
+                cantidad: parseInt(cantidad),
+                talle,
+                notas,
+                estado: 'En Producción',
+                created_at: new Date().toISOString()
+            });
+
+            if (error) {
+                document.getElementById('pedido-status').textContent = '❌ Error: ' + error.message;
+                document.getElementById('pedido-status').className = 'text-xs mt-4 text-center text-red-500';
+            } else {
+                document.getElementById('pedido-status').textContent = '✓ Pedido creado exitosamente';
+                document.getElementById('pedido-status').className = 'text-xs mt-4 text-center text-green-500';
+                document.getElementById('pedido-producto').value = '';
+                document.getElementById('pedido-cliente').value = '';
+                document.getElementById('pedido-cantidad').value = '1';
+                document.getElementById('pedido-notas').value = '';
+                document.getElementById('imagenes-producto').innerHTML = '<p class="text-xs opacity-40 italic col-span-2">Selecciona un producto para ver sus imágenes</p>';
+                cargarPedidos();
+            }
+        }
+
+        // Cargar pedidos en producción
+        async function cargarPedidos() {
+            const { data: pedidos } = await _supabase
+                .from('pedidos')
+                .select('*, productos(*)')
+                .eq('taller_id', tallerActual.id)
+                .order('created_at', { ascending: false });
+            
+            const container = document.getElementById('lista-produccion');
+            
+            if (!pedidos || pedidos.length === 0) {
+                container.innerHTML = '<p class="text-xs opacity-40 italic">No hay pedidos en producción</p>';
+                return;
+            }
+
+            container.innerHTML = pedidos.map(p => `
+                <div class="bg-black/50 p-6 border border-white/5">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg">${p.productos.nombre}</h3>
+                            <p class="text-xs opacity-60">Cliente: ${p.cliente} | Cantidad: ${p.cantidad} | Talle: ${p.talle}</p>
+                            ${p.notas ? `<p class="text-xs mt-2 opacity-80">Notas: ${p.notas}</p>` : ''}
+                        </div>
+                        <span class="text-xs px-3 py-1 bg-[#7B61FF]/20 text-[#7B61FF] rounded">${p.estado}</span>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="cambiarEstado(${p.id}, 'Completado')" class="text-xs px-4 py-2 bg-green-600 hover:bg-green-700">Completar</button>
+                        <button onclick="cambiarEstado(${p.id}, 'Cancelado')" class="text-xs px-4 py-2 bg-red-600 hover:bg-red-700">Cancelar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function cambiarEstado(pedidoId, nuevoEstado) {
+            await _supabase.from('pedidos').update({ estado: nuevoEstado }).eq('id', pedidoId);
+            cargarPedidos();
+        }
+
+        // Cargar catálogo completo
+        async function cargarCatalogo() {
+            const { data: productos } = await _supabase
+                .from('productos')
+                .select('*')
+                .eq('aprobado', true);
+            
+            const container = document.getElementById('catalogo-completo');
+            
+            if (!productos || productos.length === 0) {
+                container.innerHTML = '<p class="text-xs opacity-40 italic">No hay productos en el catálogo</p>';
+                return;
+            }
+
+            container.innerHTML = productos.map(p => `
+                <div class="border-b border-white/10 pb-6">
+                    <h3 class="font-bold text-xl mb-4">${p.nombre} - ${p.tipo}</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        ${p.imagenes_taller ? p.imagenes_taller.map(img => 
+                            `<img src="${img}" class="imagen-taller" alt="${p.nombre}">`
+                        ).join('') : '<p class="text-xs opacity-40 col-span-4">Sin imágenes de taller</p>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alien Force One | Street Born.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F4F4F2; color: #1A1A1A; overflow-x: hidden; }
+        .street-title { font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; }
+        
+        /* Slideboard de Fondo */
+        .hero-container { position: relative; height: 90vh; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; }
+        .slideboard { position: absolute; display: flex; gap: 15px; width: max-content; animation: slide 50s linear infinite; z-index: 1; }
+        .slideboard img { height: 450px; width: auto; filter: grayscale(1) contrast(1.1); opacity: 0.35; object-fit: cover; }
+        
+        @keyframes slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .hero-text { z-index: 10; text-align: center; color: white; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b px-6 py-4 flex justify-between items-center">
+        <div class="text-xl street-title italic">ALIEN FORCE <span class="text-[#7B61FF]">ONE</span></div>
+        <div class="flex items-center space-x-6 text-[10px] font-black uppercase tracking-widest">
+            <a href="#shop" class="hover:text-[#7B61FF] transition text-black">Shop</a>
+            <a href="comunidad.html" class="hover:text-[#7B61FF] transition text-black">Community</a>
+            <div class="h-4 w-[1px] bg-black/10"></div>
+            <a href="carrito.html" class="relative">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                <span id="carrito-count" class="absolute -top-2 -right-2 bg-[#7B61FF] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+            </a>
+            <a href="taller.html" class="text-zinc-400 hover:text-black transition">Taller</a>
+            <a href="admin.html" class="bg-black text-white px-4 py-2 rounded-sm hover:bg-[#7B61FF] transition">Admin</a>
+        </div>
+    </nav>
+
+    <header class="hero-container">
+        <div id="slideboard-imagenes" class="slideboard"></div>
+        <div class="hero-text">
+            <h1 class="text-6xl md:text-[10rem] street-title italic leading-[0.85] tracking-tighter">
+                STREET BORN.<br>
+                <span class="text-[#7B61FF]">SKATEBOARDING.</span>
+            </h1>
+        </div>
+    </header>
+
+    <main id="shop" class="max-w-7xl mx-auto px-6 py-24">
+        <div class="flex flex-col md:flex-row justify-between items-baseline mb-16 gap-4">
+            <div>
+                <h2 class="text-5xl street-title italic">The Drop</h2>
+                <p class="text-[10px] font-bold opacity-40 uppercase tracking-[0.4em]">A.F.ONE / Temporada 01</p>
+            </div>
+            
+            <div class="flex space-x-6 text-[11px] font-black uppercase tracking-widest border-b border-black/5 pb-2">
+                <button onclick="cargarProductos('todos')" class="hover:text-[#7B61FF] transition">Todos</button>
+                <button onclick="cargarProductos('remera')" class="hover:text-[#7B61FF] transition">Remeras</button>
+                <button onclick="cargarProductos('buzo')" class="hover:text-[#7B61FF] transition">Buzos</button>
+                <button onclick="cargarProductos('campera')" class="hover:text-[#7B61FF] transition">Camperas</button>
+                <button onclick="cargarProductos('gorra')" class="hover:text-[#7B61FF] transition">Gorras</button>
+            </div>
+        </div>
+
+        <div id="contenedor-productos" class="grid grid-cols-1 md:grid-cols-3 gap-16"></div>
+    </main>
+
+    <script>
+        const _supabase = supabase.createClient('https://hklnisiyaxffayjqsngi.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrbG5pc2l5YXhmZmF5anFzbmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5NDk3ODUsImV4cCI6MjA4NDUyNTc4NX0.jKX6weP91vPRGGafcJRpS9dEYLTJNMC-0tB8FpwE35I');
+
+        async function init() {
+            // Actualizar contador del carrito
+            actualizarContadorCarrito();
+
+            // Cargar productos random para el slideboard de fondo
+            const { data: productos } = await _supabase
+                .from('productos')
+                .select('*')
+                .eq('aprobado', true);
+            
+            if (productos && productos.length > 0) {
+                const slideContenedor = document.getElementById('slideboard-imagenes');
+                // Mezclamos los productos de forma random
+                const productosRandom = [...productos].sort(() => Math.random() - 0.5);
+                // Duplicamos para scroll infinito fluido
+                const loop = [...productosRandom, ...productosRandom, ...productosRandom, ...productosRandom];
+                
+                slideContenedor.innerHTML = loop.map(p => {
+                    return p.imagen_url ? `<img src="${p.imagen_url}" alt="${p.nombre}">` : '';
+                }).join('');
+            }
+
+            cargarProductos('todos');
+        }
+
+        function actualizarContadorCarrito() {
+            const carrito = JSON.parse(localStorage.getItem('afone_carrito') || '[]');
+            const count = carrito.reduce((total, item) => total + item.cantidad, 0);
+            const badge = document.getElementById('carrito-count');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        async function cargarProductos(categoria) {
+            const contenedor = document.getElementById('contenedor-productos');
+            contenedor.innerHTML = '<p class="text-xs uppercase opacity-30 italic">Sincronizando Drop A.F.ONE...</p>';
+            
+            // Solo mostrar productos aprobados
+            let query = _supabase
+                .from('productos')
+                .select('*')
+                .eq('aprobado', true);
+            
+            if (categoria !== 'todos') {
+                query = query.eq('tipo', categoria);
+            }
+
+            const { data: productos, error } = await query;
+            
+            if (error) {
+                console.error("Error cargando productos:", error.message);
+                contenedor.innerHTML = '<p class="text-xs uppercase opacity-50 italic text-center col-span-3 py-20">Error al cargar productos.</p>';
+                return;
+            }
+
+            if (productos && productos.length > 0) {
+                contenedor.innerHTML = productos.map(p => `
+                    <a href="producto.html?id=${p.id}" class="group cursor-pointer block">
+                        <div class="bg-white p-2 border border-black/5 overflow-hidden">
+                            <img src="${p.imagen_url}" class="w-full h-[450px] object-cover transition-all duration-1000 group-hover:scale-110">
+                        </div>
+                        <div class="mt-6 flex justify-between items-start">
+                            <div>
+                                <h3 class="street-title text-base italic">${p.nombre}</h3>
+                                <p class="text-[9px] opacity-40 font-bold uppercase tracking-widest">${p.tipo} / ${p.calce || 'Oversize'}</p>
+                            </div>
+                            <p class="font-black text-xl text-[#7B61FF]">${p.precio}</p>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                contenedor.innerHTML = '<p class="text-xs uppercase opacity-50 italic text-center col-span-3 py-20">No hay stock disponible en esta categoría.</p>';
+            }
+        }
+
+        init();
+    </script>
+
+    <footer class="bg-black text-white py-12 px-6 mt-20">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="text-xl street-title italic mb-4">ALIEN FORCE <span class="text-[#7B61FF]">ONE</span></div>
+            <div class="text-xs opacity-60 space-y-2">
+                <p>[TU RAZÓN SOCIAL] - CUIT: [TU CUIT]</p>
+                <p>[TU DOMICILIO LEGAL]</p>
+                <p>Email: [TU EMAIL] | WhatsApp: [TU WHATSAPP]</p>
+            </div>
+            <div class="mt-8 pt-8 border-t border-white/10 flex flex-wrap justify-center gap-6 text-xs">
+                <a href="terminos.html" class="hover:text-[#7B61FF] transition">Términos y Condiciones</a>
+                <a href="privacidad.html" class="hover:text-[#7B61FF] transition">Política de Privacidad</a>
+                <a href="arrepentimiento.html" class="hover:text-[#7B61FF] transition">Botón de Arrepentimiento</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botón de Arrepentimiento | A.F.ONE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F4F4F2; color: #1A1A1A; }
+        .street-title { font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; }
+        .form-input { background: white; border: 1px solid #E5E5E5; padding: 12px; width: 100%; }
+        .form-input:focus { outline: none; border-color: #7B61FF; }
+    </style>
+</head>
+<body>
+
+    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="text-xl street-title italic">ALIEN FORCE <span class="text-[#7B61FF]">ONE</span></div>
+        <a href="index.html" class="text-xs font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition">← Volver</a>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-6 py-12">
+        <h1 class="text-5xl street-title italic mb-8">BOTÓN DE ARREPENTIMIENTO</h1>
+        <p class="text-xs uppercase tracking-widest opacity-40 mb-12">Ley 24.240 de Defensa del Consumidor</p>
+
+        <div class="bg-white p-8 border border-black/5 mb-12">
+            <h2 class="text-2xl street-title italic mb-6">Información importante</h2>
+            <div class="space-y-4 text-sm">
+                <p>De acuerdo con el Artículo 34 de la Ley de Defensa del Consumidor, tenés derecho a arrepentirte de tu compra dentro de los <strong>10 días corridos</strong> desde que recibiste el producto, sin necesidad de dar explicaciones.</p>
+                
+                <div class="bg-[#7B61FF]/10 p-4 rounded">
+                    <p class="font-bold mb-2">Condiciones para ejercer el derecho de arrepentimiento:</p>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                        <li>El producto debe estar en perfectas condiciones</li>
+                        <li>Sin uso y con etiquetas originales</li>
+                        <li>Incluir todos los accesorios y embalaje original</li>
+                        <li>Presentar comprobante de compra</li>
+                    </ul>
+                </div>
+
+                <p class="text-xs opacity-60 mt-4">Una vez recibido tu solicitud, te enviaremos las instrucciones para la devolución del producto. El costo del envío de devolución corre por tu cuenta. Procesaremos el reembolso dentro de los 10 días hábiles posteriores a la recepción del producto.</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-8 border border-black/5">
+            <h2 class="text-2xl street-title italic mb-8">Formulario de Arrepentimiento</h2>
+            
+            <form id="form-arrepentimiento" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Nombre completo *</label>
+                        <input type="text" name="nombre" required class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">DNI *</label>
+                        <input type="text" name="dni" required class="form-input">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Email *</label>
+                        <input type="email" name="email" required class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Teléfono *</label>
+                        <input type="tel" name="telefono" required class="form-input">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2">Número de pedido *</label>
+                    <input type="text" name="pedido" required class="form-input" placeholder="Ej: #12345">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2">Fecha de recepción del producto *</label>
+                    <input type="date" name="fecha_recepcion" required class="form-input">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2">Producto/s a devolver *</label>
+                    <textarea name="productos" required rows="3" class="form-input" placeholder="Detallá qué producto/s querés devolver"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2">Motivo del arrepentimiento (opcional)</label>
+                    <textarea name="motivo" rows="4" class="form-input" placeholder="Podés contarnos por qué te arrepentís de la compra, aunque no es obligatorio"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2">Método de devolución preferido *</label>
+                    <select name="metodo_devolucion" required class="form-input">
+                        <option value="">Seleccioná una opción</option>
+                        <option value="reembolso">Reembolso del dinero</option>
+                        <option value="credito">Crédito en la tienda</option>
+                    </select>
+                </div>
+
+                <div class="bg-yellow-50 p-4 rounded border border-yellow-200">
+                    <label class="flex items-start">
+                        <input type="checkbox" name="acepto" required class="mt-1 mr-3">
+                        <span class="text-sm">
+                            Declaro que el/los producto/s se encuentran en perfectas condiciones, sin uso, con etiquetas originales y embalaje completo. Entiendo que el costo del envío de devolución corre por mi cuenta. *
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full bg-black text-white py-4 font-black uppercase text-sm tracking-widest hover:bg-[#7B61FF] transition">
+                    Enviar Solicitud de Arrepentimiento
+                </button>
+
+                <p id="form-status" class="text-sm text-center mt-4"></p>
+            </form>
+        </div>
+
+        <div class="mt-12 bg-white p-6 border-l-4 border-[#7B61FF]">
+            <h3 class="font-bold mb-4">¿Necesitás ayuda?</h3>
+            <p class="text-sm mb-2">Contactanos por:</p>
+            <p class="text-sm"><strong>Email:</strong> [TU EMAIL]</p>
+            <p class="text-sm"><strong>WhatsApp:</strong> [TU WHATSAPP]</p>
+            <p class="text-sm"><strong>Horario:</strong> Lunes a Viernes de 10 a 18hs</p>
+        </div>
+    </main>
+
+    <footer class="bg-black text-white py-12 px-6 mt-20">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="text-xl street-title italic mb-4">ALIEN FORCE <span class="text-[#7B61FF]">ONE</span></div>
+            <div class="text-xs opacity-60 space-y-2">
+                <p>[TU RAZÓN SOCIAL] - CUIT: [TU CUIT]</p>
+                <p>[TU DOMICILIO LEGAL]</p>
+                <p>Email: [TU EMAIL] | WhatsApp: [TU WHATSAPP]</p>
+            </div>
+            <div class="mt-8 pt-8 border-t border-white/10 flex flex-wrap justify-center gap-6 text-xs">
+                <a href="terminos.html" class="hover:text-[#7B61FF] transition">Términos y Condiciones</a>
+                <a href="privacidad.html" class="hover:text-[#7B61FF] transition">Política de Privacidad</a>
+                <a href="arrepentimiento.html" class="hover:text-[#7B61FF] transition">Botón de Arrepentimiento</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('form-arrepentimiento').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            const status = document.getElementById('form-status');
+            status.textContent = 'Enviando solicitud...';
+            status.className = 'text-sm text-center mt-4 text-blue-600';
+            
+            // Aquí irá la integración con email o base de datos
+            // Por ahora simulamos el envío
+            setTimeout(() => {
+                status.textContent = '✓ Solicitud enviada correctamente. Recibirás un email con las instrucciones en las próximas 24hs.';
+                status.className = 'text-sm text-center mt-4 text-green-600';
+                e.target.reset();
+                
+                // Opcional: enviar email con los datos
+                console.log('Solicitud de arrepentimiento:', data);
+            }, 1500);
+        });
+    </script>
+
+</body>
+</html>

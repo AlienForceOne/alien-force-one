@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Pendiente | A.F.ONE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F4F4F2; color: #1A1A1A; }
+        .street-title { font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <nav class="bg-white border-b px-6 py-4">
+        <div class="text-xl street-title italic text-center">ALIEN FORCE <span class="text-[#7B61FF]">ONE</span></div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-6 py-20 text-center">
+        <div class="bg-white p-12 rounded-lg border-2 border-yellow-500">
+            <div class="mb-8">
+                <svg class="w-24 h-24 mx-auto text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+
+            <h1 class="text-5xl street-title italic mb-4 text-yellow-600">PAGO PENDIENTE</h1>
+            <p class="text-xl mb-8">Tu pago está siendo procesado</p>
+
+            <div class="bg-yellow-50 p-6 rounded mb-8 text-left">
+                <p class="text-sm mb-4"><strong>¿Qué significa esto?</strong></p>
+                <ul class="text-sm space-y-2">
+                    <li>⏳ Pagaste en efectivo (Rapipago/Pago Fácil) - esperando confirmación</li>
+                    <li>⏳ Transferencia bancaria - esperando acreditación</li>
+                    <li>⏳ El banco está validando el pago</li>
+                </ul>
+            </div>
+
+            <div class="bg-blue-50 p-6 rounded mb-8 text-left">
+                <p class="text-sm mb-4"><strong>¿Qué sigue ahora?</strong></p>
+                <ul class="text-sm space-y-2">
+                    <li>✅ Recibirás un email cuando se confirme el pago</li>
+                    <li>✅ Esto puede tardar hasta 48hs hábiles</li>
+                    <li>✅ Prepararemos tu pedido una vez confirmado</li>
+                </ul>
+            </div>
+
+            <div class="space-y-4">
+                <a href="index.html" class="block bg-black text-white px-8 py-4 font-black uppercase text-sm tracking-widest hover:bg-[#7B61FF] transition">
+                    Volver a la Tienda
+                </a>
+                <p class="text-xs opacity-60">Número de orden: <span id="order-id"></span></p>
+            </div>
+
+            <div class="mt-8 pt-8 border-t">
+                <p class="text-xs opacity-60 mb-2">¿Tenés dudas?</p>
+                <p class="text-sm"><strong>Email:</strong> [TU EMAIL]</p>
+                <p class="text-sm"><strong>WhatsApp:</strong> [TU WHATSAPP]</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Obtener parámetros de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const externalRef = urlParams.get('external_reference');
+
+        if (externalRef) {
+            document.getElementById('order-id').textContent = externalRef;
+        }
+    </script>
+
+</body>
+</html>

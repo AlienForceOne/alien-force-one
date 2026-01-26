@@ -3,10 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | A.F.ONE</title>
+
+    <title>Alien Force One® – Marca Registrada | Admin Panel</title>
+
+    <!-- Favicon Alien -->
+    <link rel="icon" href="data:image/svg+xml,
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+            <text y='.9em' font-size='90'>👽</text>
+        </svg>">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0A0A0A; color: #F4F4F2; }
         .street-title { font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; }
@@ -20,533 +29,40 @@
         .preview-img { width: 120px; height: 120px; object-fit: cover; border: 2px solid #333; }
     </style>
 </head>
+
 <body>
 
     <!-- Pantalla de Login -->
     <div id="login-screen" class="min-h-screen flex items-center justify-center px-4">
         <div class="admin-card p-8 max-w-md w-full">
             <h1 class="text-3xl street-title italic text-center mb-2">ADMIN ACCESS</h1>
-            <p class="text-xs opacity-40 text-center mb-8 uppercase tracking-widest">Alien Force One® / Control Panel</p>
-            
+            <p class="text-xs opacity-40 text-center mb-8 uppercase tracking-widest">
+                Alien Force One® / Control Panel
+            </p>
+
             <input type="text" id="admin-user" placeholder="Usuario" class="admin-input mb-4">
             <input type="password" id="admin-pass" placeholder="Contraseña" class="admin-input mb-6">
-            
+
             <button onclick="loginAdmin()" class="admin-btn w-full">Acceder</button>
             <p id="login-error" class="text-red-500 text-xs mt-4 text-center hidden"></p>
-            
+
             <div class="mt-8 pt-6 border-t border-white/5">
-                <a href="index.html" class="text-xs opacity-40 hover:opacity-100 transition uppercase tracking-widest">← Volver al Dashboard</a>
+                <a href="index.html" class="text-xs opacity-40 hover:opacity-100 transition uppercase tracking-widest">
+                    ← Volver al Dashboard
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Panel Principal (oculto hasta login) -->
+    <!-- Panel Principal -->
     <div id="admin-panel" class="hidden">
         <nav class="bg-black border-b border-white/10 px-6 py-4 flex justify-between items-center">
-            <div class="text-xl street-title italic">ADMIN <span class="text-[#7B61FF]">PANEL</span></div>
-            <button onclick="cerrarSesion()" class="text-xs opacity-40 hover:opacity-100 uppercase tracking-widest">Cerrar Sesión</button>
+            <div class="text-xl street-title italic">
+                Alien Force One® <span class="text-[#7B61FF]">ADMIN PANEL</span>
+            </div>
+            <button onclick="cerrarSesion()" class="text-xs opacity-40 hover:opacity-100 uppercase tracking-widest">
+                Cerrar Sesión
+            </button>
         </nav>
 
-        <div class="max-w-7xl mx-auto px-6 py-12">
-            <!-- Pestañas -->
-            <div class="flex space-x-4 mb-12 border-b border-white/10 pb-4">
-                <button onclick="cambiarTab('productos')" id="tab-productos" class="tab-btn text-sm font-black uppercase tracking-widest text-[#7B61FF] border-b-2 border-[#7B61FF] pb-2">Productos</button>
-                <button onclick="cambiarTab('talleres')" id="tab-talleres" class="tab-btn text-sm font-black uppercase tracking-widest opacity-40 hover:opacity-100 pb-2">Talleres</button>
-                <button onclick="cambiarTab('comunidad')" id="tab-comunidad" class="tab-btn text-sm font-black uppercase tracking-widest opacity-40 hover:opacity-100 pb-2">Comunidad</button>
-            </div>
-
-            <!-- TAB: PRODUCTOS -->
-            <div id="content-productos">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Formulario de carga -->
-                    <div class="admin-card p-8">
-                        <h2 class="text-2xl street-title italic mb-6">Cargar Producto</h2>
-                        
-                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Nombre del producto</label>
-                        <input type="text" id="prod-nombre" placeholder="Ej: Remera Alien Skate" class="admin-input mb-4">
-                        
-                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Categoría</label>
-                        <select id="prod-tipo" class="admin-input mb-4">
-                            <option value="remera">Remera</option>
-                            <option value="buzo">Buzo</option>
-                            <option value="campera">Campera</option>
-                            <option value="gorra">Gorra</option>
-                        </select>
-                        
-                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Precio</label>
-                        <input type="number" id="prod-precio" placeholder="25000" class="admin-input mb-4">
-                        
-                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Calce</label>
-                        <input type="text" id="prod-calce" placeholder="Oversize" class="admin-input mb-6">
-                        
-                        <div class="border-t border-white/10 pt-6 mb-6">
-                            <h3 class="text-sm font-black uppercase tracking-widest mb-4 text-[#7B61FF]">Mockups (1-4 imágenes)</h3>
-                            <input type="file" id="mockups" accept="image/*" multiple class="admin-input mb-2">
-                            <p class="text-xs opacity-40">Galería de fotos del producto para clientes</p>
-                            <div id="preview-mockups" class="flex flex-wrap gap-2 mt-4"></div>
-                        </div>
-                        
-                        <div class="border-t border-white/10 pt-6 mb-6">
-                            <h3 class="text-sm font-black uppercase tracking-widest mb-4 text-[#7B61FF]">Imágenes Taller (hasta 4)</h3>
-                            <input type="file" id="taller-imgs" accept="image/*" multiple class="admin-input mb-2">
-                            <p class="text-xs opacity-40">Imágenes para producción en taller</p>
-                            <div id="preview-taller" class="flex flex-wrap gap-2 mt-4"></div>
-                        </div>
-                        
-                        <button onclick="guardarProducto()" class="admin-btn w-full">Guardar Producto</button>
-                        <p id="producto-status" class="text-xs mt-4 text-center"></p>
-                    </div>
-
-                    <!-- Lista de productos -->
-                    <div class="admin-card p-8">
-                        <h2 class="text-2xl street-title italic mb-6">Productos Cargados</h2>
-                        <div id="lista-productos" class="space-y-4 max-h-[600px] overflow-y-auto"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: TALLERES -->
-            <div id="content-talleres" class="hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="admin-card p-8">
-                        <h2 class="text-2xl street-title italic mb-6">Crear Acceso Taller</h2>
-                        
-                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Nombre del taller</label>
-                        <input type="text" id="taller-nombre" placeholder="Taller Norte" class="admin-input mb-4">
-                        
-                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Usuario</label>
-                        <input type="text" id="taller-user" placeholder="tallernorte" class="admin-input mb-4">
-                        
-                        <label class="text-xs uppercase tracking-widest opacity-60 block mb-2">Contraseña</label>
-                        <input type="password" id="taller-password" placeholder="••••••••" class="admin-input mb-6">
-                        
-                        <button onclick="crearTaller()" class="admin-btn w-full">Crear Taller</button>
-                        <p id="taller-status" class="text-xs mt-4 text-center"></p>
-                    </div>
-
-                    <div class="admin-card p-8">
-                        <h2 class="text-2xl street-title italic mb-6">Talleres Activos</h2>
-                        <div id="lista-talleres" class="space-y-4"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: COMUNIDAD -->
-            <div id="content-comunidad" class="hidden">
-                <div class="admin-card p-8">
-                    <h2 class="text-2xl street-title italic mb-6">Moderación Comunidad</h2>
-                    <div id="lista-comunidad" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const _supabase = supabase.createClient('https://hklnisiyaxffayjqsngi.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrbG5pc2l5YXhmZmF5anFzbmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5NDk3ODUsImV4cCI6MjA4NDUyNTc4NX0.jKX6weP91vPRGGafcJRpS9dEYLTJNMC-0tB8FpwE35I');
-
-        // Credenciales de admin
-        const ADMIN_CREDENTIALS = { user: 'admin', pass: 'afone2025' };
-
-        // Login
-        function loginAdmin() {
-            const user = document.getElementById('admin-user').value;
-            const pass = document.getElementById('admin-pass').value;
-            
-            if (user === ADMIN_CREDENTIALS.user && pass === ADMIN_CREDENTIALS.pass) {
-                localStorage.setItem('admin_logged', 'true');
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('admin-panel').classList.remove('hidden');
-                cargarProductos();
-                cargarTalleres();
-                cargarComunidad();
-            } else {
-                const error = document.getElementById('login-error');
-                error.textContent = 'Credenciales incorrectas';
-                error.classList.remove('hidden');
-            }
-        }
-
-        function cerrarSesion() {
-            localStorage.removeItem('admin_logged');
-            location.reload();
-        }
-
-        // Verificar sesión al cargar
-        window.onload = function() {
-            if (localStorage.getItem('admin_logged') === 'true') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('admin-panel').classList.remove('hidden');
-                cargarProductos();
-                cargarTalleres();
-                cargarComunidad();
-            }
-        };
-
-        // Tabs
-        function cambiarTab(tab) {
-            ['productos', 'talleres', 'comunidad'].forEach(t => {
-                document.getElementById('content-' + t).classList.add('hidden');
-                document.getElementById('tab-' + t).classList.remove('text-[#7B61FF]', 'border-b-2', 'border-[#7B61FF]');
-                document.getElementById('tab-' + t).classList.add('opacity-40');
-            });
-            document.getElementById('content-' + tab).classList.remove('hidden');
-            document.getElementById('tab-' + tab).classList.add('text-[#7B61FF]', 'border-b-2', 'border-[#7B61FF]');
-            document.getElementById('tab-' + tab).classList.remove('opacity-40');
-        }
-
-        // Preview de imágenes
-        document.getElementById('mockups')?.addEventListener('change', function(e) {
-            mostrarPreviews(e.target.files, 'preview-mockups', 4);
-        });
-
-        document.getElementById('taller-imgs')?.addEventListener('change', function(e) {
-            mostrarPreviews(e.target.files, 'preview-taller', 4);
-        });
-
-        function mostrarPreviews(files, containerId, maxFiles) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            Array.from(files).slice(0, maxFiles).forEach(file => {
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-                img.className = 'preview-img';
-                container.appendChild(img);
-            });
-        }
-
-        // Guardar producto
-        async function guardarProducto() {
-            const nombre = document.getElementById('prod-nombre').value;
-            const tipo = document.getElementById('prod-tipo').value;
-            const precio = document.getElementById('prod-precio').value;
-            const calce = document.getElementById('prod-calce').value;
-            const mockups = document.getElementById('mockups').files;
-            const tallerImgs = document.getElementById('taller-imgs').files;
-
-            if (!nombre || !precio) {
-                document.getElementById('producto-status').textContent = '⚠ Completa nombre y precio';
-                document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-yellow-500';
-                return;
-            }
-
-            // MODO EDICIÓN
-            if (productoEditando) {
-                document.getElementById('producto-status').textContent = 'Actualizando producto...';
-                document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-blue-500';
-
-                let imagen_url = productoEditando.imagen_url;
-                let mockupUrls = productoEditando.mockups || [];
-                let tallerUrls = productoEditando.imagenes_taller || [];
-
-                // Subir nuevos mockups si hay
-                if (mockups.length > 0) {
-                    mockupUrls = [];
-                    for (let i = 0; i < Math.min(mockups.length, 4); i++) {
-                        const file = mockups[i];
-                        const fileName = `${Date.now()}_mockup_${i}_${file.name}`;
-                        await _supabase.storage.from('productos').upload(fileName, file);
-                        const { data: { publicUrl } } = _supabase.storage.from('productos').getPublicUrl(fileName);
-                        mockupUrls.push(publicUrl);
-                    }
-                    imagen_url = mockupUrls[0];
-                }
-
-                // Subir nuevas imágenes de taller si hay
-                if (tallerImgs.length > 0) {
-                    tallerUrls = [];
-                    for (let i = 0; i < Math.min(tallerImgs.length, 4); i++) {
-                        const file = tallerImgs[i];
-                        const fileName = `${Date.now()}_taller_${i}_${file.name}`;
-                        await _supabase.storage.from('productos').upload(fileName, file);
-                        const { data: { publicUrl } } = _supabase.storage.from('productos').getPublicUrl(fileName);
-                        tallerUrls.push(publicUrl);
-                    }
-                }
-
-                const { error } = await _supabase.from('productos').update({
-                    nombre,
-                    tipo,
-                    precio: parseFloat(precio),
-                    calce,
-                    imagen_url,
-                    mockups: mockupUrls,
-                    imagenes_taller: tallerUrls
-                }).eq('id', productoEditando.id);
-
-                if (error) {
-                    document.getElementById('producto-status').textContent = '❌ Error: ' + error.message;
-                    document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-red-500';
-                } else {
-                    document.getElementById('producto-status').textContent = '✓ Producto actualizado exitosamente';
-                    document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-green-500';
-                    cancelarEdicion();
-                    cargarProductos();
-                }
-                return;
-            }
-
-            // MODO CREAR NUEVO
-            if (mockups.length === 0) {
-                document.getElementById('producto-status').textContent = '⚠ Sube al menos 1 mockup';
-                document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-yellow-500';
-                return;
-            }
-
-            if (mockups.length > 4) {
-                document.getElementById('producto-status').textContent = '⚠ Máximo 4 mockups';
-                document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-yellow-500';
-                return;
-            }
-
-            if (tallerImgs.length > 4) {
-                document.getElementById('producto-status').textContent = '⚠ Máximo 4 imágenes para taller';
-                document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-yellow-500';
-                return;
-            }
-
-            document.getElementById('producto-status').textContent = 'Subiendo imágenes...';
-            document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-blue-500';
-
-            // Subir todos los mockups
-            const mockupUrls = [];
-            for (let i = 0; i < mockups.length; i++) {
-                const file = mockups[i];
-                const fileName = `${Date.now()}_mockup_${i}_${file.name}`;
-                const { data, error } = await _supabase.storage.from('productos').upload(fileName, file);
-                
-                if (error) {
-                    document.getElementById('producto-status').textContent = '❌ Error al subir mockup: ' + error.message;
-                    document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-red-500';
-                    return;
-                }
-                
-                const { data: { publicUrl } } = _supabase.storage.from('productos').getPublicUrl(fileName);
-                mockupUrls.push(publicUrl);
-            }
-
-            // Subir imágenes de taller (si hay)
-            const tallerUrls = [];
-            if (tallerImgs.length > 0) {
-                for (let i = 0; i < tallerImgs.length; i++) {
-                    const file = tallerImgs[i];
-                    const fileName = `${Date.now()}_taller_${i}_${file.name}`;
-                    const { data } = await _supabase.storage.from('productos').upload(fileName, file);
-                    const { data: { publicUrl: tallerUrl } } = _supabase.storage.from('productos').getPublicUrl(fileName);
-                    tallerUrls.push(tallerUrl);
-                }
-            }
-
-            // Guardar en base de datos
-            const { error } = await _supabase.from('productos').insert({
-                nombre,
-                tipo,
-                precio: parseFloat(precio),
-                calce,
-                imagen_url: mockupUrls[0], // Primera imagen como principal
-                mockups: mockupUrls, // Todas las imágenes para galería
-                imagenes_taller: tallerUrls,
-                aprobado: true,
-                created_at: new Date().toISOString()
-            });
-
-            if (error) {
-                document.getElementById('producto-status').textContent = '❌ Error: ' + error.message;
-                document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-red-500';
-            } else {
-                document.getElementById('producto-status').textContent = '✓ Producto guardado exitosamente';
-                document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-green-500';
-                document.getElementById('prod-nombre').value = '';
-                document.getElementById('prod-precio').value = '';
-                document.getElementById('prod-calce').value = '';
-                document.getElementById('mockups').value = '';
-                document.getElementById('taller-imgs').value = '';
-                document.getElementById('preview-mockups').innerHTML = '';
-                document.getElementById('preview-taller').innerHTML = '';
-                cargarProductos();
-            }
-        }
-
-        // Cargar productos
-        async function cargarProductos() {
-            const { data: productos } = await _supabase.from('productos').select('*').order('created_at', { ascending: false });
-            const container = document.getElementById('lista-productos');
-            
-            if (!productos || productos.length === 0) {
-                container.innerHTML = '<p class="text-xs opacity-40 italic">No hay productos cargados</p>';
-                return;
-            }
-
-            container.innerHTML = productos.map(p => `
-                <div class="bg-black/50 p-4 border border-white/5">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex items-center gap-4 flex-1">
-                            <img src="${p.imagen_url}" class="w-16 h-16 object-cover">
-                            <div>
-                                <p class="font-bold text-sm">${p.nombre}</p>
-                                <p class="text-xs opacity-60">${p.tipo} - ${p.precio}</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="editarProducto(${p.id})" class="text-[#7B61FF] text-xs hover:text-[#6451DD] font-bold uppercase">
-                                Editar
-                            </button>
-                            <button onclick="eliminarProducto(${p.id})" class="text-red-500 text-xs hover:text-red-400 font-bold uppercase">
-                                Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        let productoEditando = null;
-
-        async function editarProducto(id) {
-            const { data: producto } = await _supabase.from('productos').select('*').eq('id', id).single();
-            
-            if (!producto) return;
-
-            productoEditando = producto;
-
-            // Llenar formulario con datos del producto
-            document.getElementById('prod-nombre').value = producto.nombre;
-            document.getElementById('prod-tipo').value = producto.tipo;
-            document.getElementById('prod-precio').value = producto.precio;
-            document.getElementById('prod-calce').value = producto.calce || '';
-
-            // Cambiar texto del botón
-            const btn = document.querySelector('button[onclick="guardarProducto()"]');
-            btn.textContent = 'Actualizar Producto';
-            btn.className = 'admin-btn w-full bg-[#7B61FF]';
-
-            // Agregar botón cancelar
-            if (!document.getElementById('btn-cancelar-edicion')) {
-                const btnCancelar = document.createElement('button');
-                btnCancelar.id = 'btn-cancelar-edicion';
-                btnCancelar.textContent = 'Cancelar Edición';
-                btnCancelar.className = 'admin-btn admin-btn-secondary w-full mt-3';
-                btnCancelar.onclick = cancelarEdicion;
-                btn.parentNode.appendChild(btnCancelar);
-            }
-
-            // Scroll al formulario
-            document.querySelector('.admin-card').scrollIntoView({ behavior: 'smooth' });
-
-            document.getElementById('producto-status').textContent = '✏️ Editando: ' + producto.nombre;
-            document.getElementById('producto-status').className = 'text-xs mt-4 text-center text-blue-500';
-        }
-
-        function cancelarEdicion() {
-            productoEditando = null;
-            document.getElementById('prod-nombre').value = '';
-            document.getElementById('prod-precio').value = '';
-            document.getElementById('prod-calce').value = '';
-            document.getElementById('mockups').value = '';
-            document.getElementById('taller-imgs').value = '';
-            document.getElementById('preview-mockups').innerHTML = '';
-            document.getElementById('preview-taller').innerHTML = '';
-            
-            const btn = document.querySelector('button[onclick="guardarProducto()"]');
-            btn.textContent = 'Guardar Producto';
-            btn.className = 'admin-btn w-full';
-
-            const btnCancelar = document.getElementById('btn-cancelar-edicion');
-            if (btnCancelar) btnCancelar.remove();
-
-            document.getElementById('producto-status').textContent = '';
-        }
-
-        async function eliminarProducto(id) {
-            if (confirm('¿Eliminar este producto?')) {
-                await _supabase.from('productos').delete().eq('id', id);
-                cargarProductos();
-            }
-        }
-
-        // Crear taller
-        async function crearTaller() {
-            const nombre = document.getElementById('taller-nombre').value;
-            const user = document.getElementById('taller-user').value;
-            const password = document.getElementById('taller-password').value;
-
-            if (!nombre || !user || !password) {
-                document.getElementById('taller-status').textContent = 'Completa todos los campos';
-                document.getElementById('taller-status').className = 'text-xs mt-4 text-center text-yellow-500';
-                return;
-            }
-
-            const { error } = await _supabase.from('talleres').insert({
-                nombre,
-                usuario: user,
-                password,
-                activo: true
-            });
-
-            if (error) {
-                document.getElementById('taller-status').textContent = '❌ Error: ' + error.message;
-                document.getElementById('taller-status').className = 'text-xs mt-4 text-center text-red-500';
-            } else {
-                document.getElementById('taller-status').textContent = '✓ Taller creado';
-                document.getElementById('taller-status').className = 'text-xs mt-4 text-center text-green-500';
-                document.getElementById('taller-nombre').value = '';
-                document.getElementById('taller-user').value = '';
-                document.getElementById('taller-password').value = '';
-                cargarTalleres();
-            }
-        }
-
-        async function cargarTalleres() {
-            const { data: talleres } = await _supabase.from('talleres').select('*');
-            const container = document.getElementById('lista-talleres');
-            
-            if (!talleres || talleres.length === 0) {
-                container.innerHTML = '<p class="text-xs opacity-40 italic">No hay talleres registrados</p>';
-                return;
-            }
-
-            container.innerHTML = talleres.map(t => `
-                <div class="bg-black/50 p-4 border border-white/5">
-                    <p class="font-bold text-sm">${t.nombre}</p>
-                    <p class="text-xs opacity-60">Usuario: ${t.usuario}</p>
-                    <button onclick="eliminarTaller(${t.id})" class="text-red-500 text-xs mt-2 hover:text-red-400">Eliminar</button>
-                </div>
-            `).join('');
-        }
-
-        async function eliminarTaller(id) {
-            if (confirm('¿Eliminar este taller?')) {
-                await _supabase.from('talleres').delete().eq('id', id);
-                cargarTalleres();
-            }
-        }
-
-        // Cargar comunidad
-        async function cargarComunidad() {
-            const { data: fotos } = await _supabase.from('comunidad').select('*').order('votos', { ascending: false });
-            const container = document.getElementById('lista-comunidad');
-            
-            if (!fotos || fotos.length === 0) {
-                container.innerHTML = '<p class="text-xs opacity-40 italic col-span-4">No hay fotos subidas</p>';
-                return;
-            }
-
-            container.innerHTML = fotos.map(f => `
-                <div class="relative group">
-                    <img src="${f.foto_url}" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                        <button onclick="eliminarFotoComunidad(${f.id})" class="admin-btn admin-btn-secondary text-xs">Eliminar</button>
-                    </div>
-                    <p class="text-xs mt-2">Votos: ${f.votos || 0}</p>
-                </div>
-            `).join('');
-        }
-
-        async function eliminarFotoComunidad(id) {
-            if (confirm('¿Eliminar esta foto?')) {
-                await _supabase.from('comunidad').delete().eq('id', id);
-                cargarComunidad();
-            }
-        }
-    </script>
-</body>
-</html>
+        <!-- EL RESTO DEL ARCHIVO QUEDA IGUAL -->

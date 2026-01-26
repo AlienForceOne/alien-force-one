@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Carrito | A.F.ONE</title>
+
+    <title>Carrito | Alien Force One®</title>
+
+    <!-- Favicon cabeza alien -->
+    <link rel="icon" type="image/png" href="assets/favicon-alien.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -25,9 +29,11 @@
 
 <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
     <div class="text-xl street-title italic">
-        ALIEN FORCE <span class="text-[#7B61FF]">ONE</span>
+        ALIEN FORCE <span class="text-[#7B61FF]">ONE®</span>
     </div>
-    <a href="index.html" class="text-xs font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition">
+
+    <a href="index.html"
+       class="text-xs font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition">
         ← Seguir Comprando
     </a>
 </nav>
@@ -37,7 +43,8 @@
 
     <div id="carrito-vacio" class="text-center py-20 hidden">
         <p class="text-xl opacity-40 mb-8">Tu carrito está vacío</p>
-        <a href="index.html" class="inline-block bg-black text-white px-8 py-3 font-black uppercase text-sm tracking-widest hover:bg-[#7B61FF] transition">
+        <a href="index.html"
+           class="inline-block bg-black text-white px-8 py-3 font-black uppercase text-sm tracking-widest hover:bg-[#7B61FF] transition">
             Ir a la tienda
         </a>
     </div>
@@ -52,11 +59,13 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button onclick="vaciarCarrito()" class="bg-white border-2 border-black px-8 py-4 font-black uppercase text-sm tracking-widest hover:bg-black hover:text-white transition">
+                <button onclick="vaciarCarrito()"
+                        class="bg-white border-2 border-black px-8 py-4 font-black uppercase text-sm tracking-widest hover:bg-black hover:text-white transition">
                     Vaciar Carrito
                 </button>
 
-                <button onclick="iniciarCheckout()" class="bg-black text-white px-8 py-4 font-black uppercase text-sm tracking-widest hover:bg-[#7B61FF] transition">
+                <button onclick="iniciarCheckout()"
+                        class="bg-black text-white px-8 py-4 font-black uppercase text-sm tracking-widest hover:bg-[#7B61FF] transition">
                     Pagar con MercadoPago
                 </button>
             </div>
@@ -96,7 +105,8 @@ function cargarCarrito() {
                 <button onclick="cambiarCantidad(${idx}, 1)" class="w-8 h-8 border">+</button>
             </div>
 
-            <button onclick="eliminarItem(${idx})" class="text-red-600 text-sm uppercase font-bold">
+            <button onclick="eliminarItem(${idx})"
+                    class="text-red-600 text-sm uppercase font-bold">
                 Eliminar
             </button>
         </div>
@@ -114,9 +124,7 @@ function actualizarTotal() {
 function cambiarCantidad(index, delta) {
     const carrito = JSON.parse(localStorage.getItem('afone_carrito') || '[]');
     carrito[index].cantidad += delta;
-
     if (carrito[index].cantidad <= 0) carrito.splice(index, 1);
-
     localStorage.setItem('afone_carrito', JSON.stringify(carrito));
     cargarCarrito();
 }
@@ -147,7 +155,6 @@ async function iniciarCheckout() {
     status.textContent = 'Generando pago...';
 
     try {
-        // Llama a tu backend seguro, donde el token de MercadoPago está protegido
         const response = await fetch('/api/create-preference', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -174,7 +181,7 @@ cargarCarrito();
 <footer class="bg-black text-white py-12 px-6 mt-20">
     <div class="max-w-7xl mx-auto text-center">
         <div class="text-xl street-title italic mb-4">
-            ALIEN FORCE <span class="text-[#7B61FF]">ONE</span>
+            ALIEN FORCE <span class="text-[#7B61FF]">ONE®</span>
         </div>
         <p class="text-xs opacity-60">Proyecto en desarrollo</p>
     </div>
